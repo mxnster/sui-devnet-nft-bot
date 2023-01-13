@@ -320,25 +320,28 @@ async function handleNFTs(mnemonic, isOld = false) {
 
 (async () => {
     errorHandler()
+    let isProxyValid = await checkIp();
+    if (isProxyValid) {
+        console.log(`Proxy is valid`);
+        if (config.oldWallets) {
+            let mnemonics = parseFile('oldWallets.txt');
+            console.log(`Loaded ${mnemonics.length} wallets`);
 
-    if (config.oldWallets) {
-        let mnemonics = parseFile('oldWallets.txt');
-        console.log(`Loaded ${mnemonics.length} wallets`);
+            for (let i = 0; i < mnemonics.length; i++) {
+                const mnemonic = mnemonics[i]
+                const keypair = Ed25519Keypair.deriveKeypair(mnemonic);
+                const address = keypair.getPublicKey().toSuiAddress();
+                let balance = await provider.getCoinBalancesOwnedByAddress(address)
 
-        for (let i = 0; i < mnemonics.length; i++) {
-            const mnemonic = mnemonics[i]
-            const keypair = Ed25519Keypair.deriveKeypair(mnemonic);
-            const address = keypair.getPublicKey().toSuiAddress();
-            let balance = await provider.getCoinBalancesOwnedByAddress(address)
-
-            if (balance.length === 0) {
-                await handleNFTs(mnemonic, true) // skip wallets with already minted nfts
-            } else console.log(`Wallet ${address} has already has NFT`);
+                if (balance.length === 0) {
+                    await handleNFTs(mnemonic, true) // skip wallets with already minted nfts
+                } else console.log(`Wallet ${address} has already has NFT`);
+            }
+        } else {
+            while (true) {
+                const mnemonic = bip39.generateMnemonic();
+                await handleNFTs(mnemonic)
+            }
         }
-    } else {
-        while (true) {
-            const mnemonic = bip39.generateMnemonic();
-            await handleNFTs(mnemonic)
-        }
-    }
+    } console.log(`Invalid proxy`);
 })()
