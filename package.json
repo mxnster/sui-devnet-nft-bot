@@ -7,7 +7,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "sui",
+    "devnet",
+    "capys",
+    "nft",
+    "mint"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
